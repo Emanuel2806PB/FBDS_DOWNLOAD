@@ -4,11 +4,14 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-##CÓDIGO VERSÃO 1.0 - Desenvolvido por Emanuel Gomes Soares - Engenheiro Ambiental
+## CÓDIGO VERSÃO 1.1 - Desenvolvido por Emanuel Gomes Soares - Engenheiro Ambiental
+## Agora com seleção de estado via sigla
 
-
-BASE_URL = "https://geo.fbds.org.br/PB/"
-DOWNLOAD_DIR = "PB_download"
+# Lista de estados válidos conforme estrutura da FBDS
+VALID_STATES = {
+    "AC","AL","AM","AP","BA","CE","DF","ES","GO","MA","MG","MS","MT",
+    "PA","PB","PE","PI","PR","RJ","RN","RO","RR","RS","SC","SE","SP","TO"
+}
 
 session = requests.Session()
 session.headers.update({"User-Agent": "Mozilla/5.0"})
@@ -86,6 +89,27 @@ def scrape_directory_parallel(start_url, base_folder):
             pass
 
 if __name__ == "__main__":
+    print("=== Downloader FBDS - Versão 1.1 ===")
+    print("Desenvolvido por Emanuel Gomes Soares - Engenheiro Ambiental\n")
+
+    print("Estados disponíveis:")
+    print(", ".join(sorted(VALID_STATES)))
+    print()
+
+    state = input("Digite a sigla do estado (ex: PB): ").upper().strip()
+
+    if state not in VALID_STATES:
+        print(f"[ERRO] Sigla '{state}' inválida! Encerrando o programa.")
+        exit()
+
+    BASE_URL = f"https://geo.fbds.org.br/{state}/"
+    DOWNLOAD_DIR = f"{state}_download"
+
+    print(f"\nEstado selecionado: {state}")
+    print(f"URL base: {BASE_URL}")
+    print(f"Pasta de destino: {DOWNLOAD_DIR}\n")
+
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
     scrape_directory_parallel(BASE_URL, DOWNLOAD_DIR)
-    print("✔ Download concluído!")
+
+    print("\n Download concluído!")
